@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs:ro
+      - vhostd:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    labels:
+      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - vhostd:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  server:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: my-server
+    container_name: myapp-nuxtjs
+    command: npm start
+    restart: always
+    expose:
+      - "80"
+    volumes:
+      - ./client/:/usr/src/nuxt-app
+      - /usr/src/app/node_modules
+    depends_on: 
+      - nginx-proxy
+      - letsencrypt
+    environment:
+      - VIRTUAL_HOST=denyl.ml,www.denyl.ml
+      - LETSENCRYPT_HOST=denyl.ml,www.denyl.ml
+      - LETSENCRYPT_EMAIL=imdenyl@gmail.com
+volumes: 
+  certs:
+  html:
+  vhostd:
