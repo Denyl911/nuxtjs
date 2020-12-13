@@ -36,9 +36,6 @@ services:
     restart: always
     expose:
       - "80"
-    volumes:
-      - ./client/:/usr/src/nuxt-app
-      - /usr/src/app/node_modules
     depends_on: 
       - nginx-proxy
       - letsencrypt

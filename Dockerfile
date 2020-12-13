@@ -1,11 +1,11 @@
 FROM node:14.15.1-alpine
 
 # create destination directory
-RUN mkdir -p /usr/src/nuxt-app
-WORKDIR /usr/src/nuxt-app
+WORKDIR /app
 
 # copy the app, note .dockerignore
-COPY . /usr/src/nuxt-app/
+COPY . ./
+
 RUN npm install
 
 # build necessary, even if no static files are needed,
